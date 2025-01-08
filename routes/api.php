@@ -31,12 +31,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/auth', [UserController::class, 'getAuthUser']);
 });
 
+Route::apiResource('/stories', App\Http\Controllers\StoryController::class);
+Route::apiResource('/category', App\Http\Controllers\CategoryController::class);
+Route::get('/stories/category/{categoryId}', [StoryController::class, 'getByCategory']);
+
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('/stories', App\Http\Controllers\StoryController::class);
-    Route::apiResource('/category', App\Http\Controllers\CategoryController::class);
     Route::apiResource('/bookmark', App\Http\Controllers\BookmarkController::class);
-    Route::get('/stories/category/{categoryId}', [StoryController::class, 'getByCategory']);
 });
+
 
 
 
