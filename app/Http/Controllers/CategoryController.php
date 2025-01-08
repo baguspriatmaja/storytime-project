@@ -17,7 +17,7 @@ class CategoryController extends Controller
             $category = $category->where('name', 'like', "%{$keyword}%");
         }
 
-        $category = $category->orderBy('name', 'desc')->paginate(5);
+        $category = $category->orderBy('id', 'asc')->paginate(5);
         return response()->json($category);
     }
 
