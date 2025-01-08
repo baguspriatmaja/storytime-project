@@ -11,14 +11,22 @@ class CategoryController extends Controller
     {
         $keyword = $request->input('keyword');
 
-        $category = Category::query();
+        $categoryQuery = Category::query();
 
-        if($keyword) {
-            $category = $category->where('name', 'like', "%{$keyword}%");
+        if ($keyword) {
+            $categoryQuery->where('name', 'like', "%{$keyword}%");
         }
 
-        $category = $category->orderBy('id', 'asc')->paginate(5);
-        return response()->json($category);
+        $categories = $categoryQuery->orderBy('id', 'asc')->get();
+
+        // Bungkus data seperti format paginate()
+        $response = [
+            'data' => $categories,
+            'links' => null,
+            'meta' => null
+        ];
+
+        return response()->json($response);
     }
 
     public function store(Request $request)
