@@ -17,7 +17,7 @@ class CategoryController extends Controller
             $category = $category->where('name', 'like', "%{$keyword}%");
         }
 
-        $category = $category->get();
+        $category = $category->orderBy('name', 'desc')->get();
 
         return response()->json($category);
     }
