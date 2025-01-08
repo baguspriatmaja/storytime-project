@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\StoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/stories', App\Http\Controllers\StoryController::class);
     Route::apiResource('/category', App\Http\Controllers\CategoryController::class);
     Route::apiResource('/bookmark', App\Http\Controllers\BookmarkController::class);
+    Route::get('/stories/category/{categoryId}', [StoryController::class, 'getByCategory']);
 });
+
+
 
 

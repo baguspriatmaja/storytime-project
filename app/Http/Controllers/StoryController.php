@@ -69,4 +69,21 @@ class StoryController extends Controller
 
         return response()->json(['message' => 'Story berhasil dihapus'], 200);
     }
+
+    public function getByCategory($categoryId)
+    {
+        // Ambil stories berdasarkan category_id
+        $stories = Story::with(['category', 'user'])
+            ->where('category_id', $categoryId)
+            ->orderBy('title', 'asc')
+            ->paginate(5); // Sesuaikan pagination jika perlu
+
+        // Cek apakah data ditemukan
+        if ($stories->isEmpty()) {
+            return response()->json(['message' => 'Tidak ada story untuk kategori ini.'], 404);
+        }
+
+        return response()->json($stories, 200);
+    }
+
 }

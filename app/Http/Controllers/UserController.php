@@ -98,7 +98,7 @@ class UserController extends Controller
         ], 500);
     }
 }
-
+ 
     // Fungsi untuk logout
     public function logout(Request $request)
     {
@@ -189,7 +189,7 @@ class UserController extends Controller
             if ($request->hasFile('imageLink')) {
                 $imagePath = $request->file('imageLink')->store('profile_images', 'public');
                 $user->imageLink = $imagePath;
-                $user->save();
+                $user->save(); 
             }
 
             return response()->json([
