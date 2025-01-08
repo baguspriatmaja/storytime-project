@@ -13,15 +13,13 @@ class CategoryController extends Controller
 
         $category = Category::query();
 
-        if ($keyword) {
+        if($keyword) {
             $category = $category->where('name', 'like', "%{$keyword}%");
         }
 
-        $category = $category->orderBy('name', 'desc')->get();
-
+        $category = $category->orderBy('name', 'desc')->paginate(5);
         return response()->json($category);
     }
-
 
     public function store(Request $request)
     {
