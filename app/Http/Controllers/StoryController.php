@@ -42,12 +42,22 @@ class StoryController extends Controller
 
         $validatedData['user_id'] = auth()->id();
 
-        $stories = Story::create($validatedData);
+        if ($request->hasFile('content_image')) {
+            $file = $request->file('content_image');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('stories_images', $fileName, 'public');
+    
+            $validatedData['content_image'] = $filePath; // Simpan path file ke database
+        }
+
+        $story = Story::create($validatedData);
+
         return response()->json([
-            'message' => 'Content berhasil disimpan',
-            'story' => $stories
+            'message' => 'Story berhasil disimpan',
+            'story' => $story
         ], 201);
     }
+
 
     public function show(string $id)
     {
@@ -57,10 +67,41 @@ class StoryController extends Controller
 
     public function update(Request $request, string $id)
     {
+        // Temukan story berdasarkan ID
         $story = Story::findOrFail($id);
-        $story->update($request->all());
-        return response()->json(['message' => 'Story berhasil diupdate'], 200);
+
+        // Validasi request, sesuaikan dengan kebutuhan Anda
+        $validatedData = $request->validate([
+            'title' => ['nullable'],
+            'content' => ['nullable'],
+            'content_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+        ]);
+
+        // Periksa apakah ada file 'content_image' yang diunggah
+        if ($request->hasFile('content_image')) {
+            $file = $request->file('content_image');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('stories_images', $fileName, 'public');
+
+            // Update field 'content_image' dengan path file baru
+            $validatedData['content_image'] = $filePath;
+
+            // Hapus file lama jika ada
+            if ($story->content_image && \Storage::disk('public')->exists($story->content_image)) {
+                \Storage::disk('public')->delete($story->content_image);
+            }
+        }
+
+        // Update story dengan data yang sudah divalidasi
+        $story->update($validatedData);
+
+        // Kembalikan response
+        return response()->json([
+            'message' => 'Story berhasil diupdate',
+            'story' => $story
+        ], 200);
     }
+
 
     public function destroy(string $id)
     {

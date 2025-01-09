@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StoryController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -31,11 +32,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/auth', [UserController::class, 'getAuthUser']);
 });
 
-Route::apiResource('/stories', App\Http\Controllers\StoryController::class);
-Route::apiResource('/category', App\Http\Controllers\CategoryController::class);
+Route::get('/stories', [StoryController::class, 'index']);
+Route::get('/stories/{id}', [StoryController::class, 'show']);
+Route::get('/category', [CategoryController::class, 'index']);
+Route::get('/category/{id}', [CategoryController::class, 'show']);
 Route::get('/stories/category/{categoryId}', [StoryController::class, 'getByCategory']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/stories', [StoryController::class, 'store']);
+    Route::post('/stories/{id}', [StoryController::class, 'update']);
+    Route::delete('/stories/{id}', [StoryController::class, 'destroy']);
+    Route::post('/category', [CategoryController::class, 'store']);
+    Route::put('/category/{id}', [CategoryController::class, 'update']);
+    Route::delete('/category/{id}', [CategoryController::class, 'destroy']);
     Route::apiResource('/bookmark', App\Http\Controllers\BookmarkController::class);
 });
 
