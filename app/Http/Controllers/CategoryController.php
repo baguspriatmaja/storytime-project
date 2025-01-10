@@ -19,11 +19,8 @@ class CategoryController extends Controller
 
         $categories = $categoryQuery->orderBy('id', 'asc')->get();
 
-        // Bungkus data seperti format paginate()
         $response = [
-            'data' => $categories,
-            'links' => null,
-            'meta' => null
+            'data' => $categories
         ];
 
         return response()->json($response);

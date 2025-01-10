@@ -21,9 +21,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
 Route::post('/login', [UserController::class, 'login']);
 Route::post('/register', [UserController::class, 'register']);
 Route::middleware('auth:sanctum')->post('/logout', [UserController::class, 'logout']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/users/{userId}/update', [UserController::class, 'updateProfile']);
@@ -32,19 +34,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/auth', [UserController::class, 'getAuthUser']);
 });
 
-Route::get('/stories', [StoryController::class, 'index']);
-Route::get('/stories/{id}', [StoryController::class, 'show']);
-Route::get('/category', [CategoryController::class, 'index']);
-Route::get('/category/{id}', [CategoryController::class, 'show']);
-Route::get('/stories/category/{categoryId}', [StoryController::class, 'getByCategory']);
+
+Route::apiResource('/stories', StoryController::class, ['only' => ['index', 'show']]);
+Route::apiResource('/category', CategoryController::class, ['only' => ['index', 'show']]);
+Route::get('/stories/category/{categoryId}', [StoryController::class, 'getStoriesByCategory']);
+Route::get('/get/latest-stories', [StoryController::class, 'getLatestStory']);
+Route::get('/get/newest-stories', [StoryController::class, 'getNewestStory']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/stories', [StoryController::class, 'store']);
-    Route::post('/stories/{id}', [StoryController::class, 'update']);
-    Route::delete('/stories/{id}', [StoryController::class, 'destroy']);
-    Route::post('/category', [CategoryController::class, 'store']);
-    Route::put('/category/{id}', [CategoryController::class, 'update']);
-    Route::delete('/category/{id}', [CategoryController::class, 'destroy']);
+    Route::apiResource('/stories', StoryController::class, ['except' => ['index', 'show']]);
+    Route::apiResource('/category', CategoryController::class, ['except' => ['index', 'show']]);
     Route::apiResource('/bookmark', App\Http\Controllers\BookmarkController::class);
 });
 
