@@ -3,6 +3,7 @@
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StoryController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\BookmarkController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -38,7 +39,6 @@ Route::middleware('auth:sanctum')->group(function () {
 // Route Story
 Route::get('/stories', [StoryController::class, 'index']);
 Route::get('/stories/{storyId}', [StoryController::class, 'show']);
-Route::get('/stories/category/{categoryId}', [StoryController::class, 'getStoriesByCategory']);
 Route::get('/get/latest-stories', [StoryController::class, 'getLatestStory']);
 Route::get('/get/newest-stories', [StoryController::class, 'getNewestStory']);
 
@@ -52,12 +52,19 @@ Route::middleware('auth:sanctum')->group(function () {
 // Route Category
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{categoryId}', [CategoryController::class, 'show']);
+Route::get('/stories/category/{categoryId}', [CategoryController::class, 'getStoriesByCategory']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/categories/add', [CategoryController::class, 'store']);
     Route::put('/categories/{categoryId}/update', [CategoryController::class, 'update']);
     Route::delete('/categories/{categoryId}/delete', [CategoryController::class, 'destroy']);
 });
+
+// Route Bookmarks
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('/bookmarks', BookmarkController::class);
+});
+
 
 
 

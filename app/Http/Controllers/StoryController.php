@@ -39,25 +39,6 @@ class StoryController extends Controller
         return response()->json($stories);
     }
 
-
-    public function getStoriesByCategory($categoryId)
-    {
-        $stories = Story::with(['category', 'user'])
-            ->where('category_id', $categoryId)
-            ->orderBy('id', 'asc')
-            ->get();
-
-        if ($stories->isEmpty()) {
-            return response()->json(['message' => 'Tidak ada story untuk kategori ini.'], 404);
-        }
-
-        $response = [
-            'data' => $stories
-        ];
-
-        return response()->json($response, 200);
-    }
-
     public function getNewestStory()
     {
         $stories = Story::with(['category','user']);
@@ -87,17 +68,15 @@ class StoryController extends Controller
         $imagePaths = [];
         if ($request->hasFile('content_image')) {
             foreach ($request->file('content_image') as $index => $file) {
-                $fileName = time() . "_{$index}_" . $file->getClientOriginalName();
+                $fileName = $file->getClientOriginalName();
                 $filePath = $file->storeAs('stories_images', $fileName, 'public');
 
-                $imagePaths[] = [
-                    'id' => $index + 1,
-                    'path' => $filePath
-                ];
+                $fullPath = url("storage/$filePath");
+                $imagePaths[] = $fullPath;
             }
         }
 
-        $validatedData['content_image'] = json_encode($imagePaths);
+        $validatedData['content_image'] = json_encode($imagePaths, JSON_UNESCAPED_UNICODE);
 
         $story = Story::create($validatedData);
 
