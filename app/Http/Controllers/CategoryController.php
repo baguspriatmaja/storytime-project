@@ -82,7 +82,7 @@ class CategoryController extends Controller
                     'title' => $story->title,
                     'author' => $story->user->name,
                     'content' => $story->content,
-                    'cover' => $story->content_image,
+                    'cover' => $story->images[0],
                     'author_img' => $story->user->imageLink,
                     'created_at' => $story->created_at->toDateTimeString(),
                 ];

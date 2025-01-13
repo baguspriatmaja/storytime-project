@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Storage;
-use App\Models\Story;
 use Illuminate\Http\Request;
+use App\Models\Story;
+use App\Models\StoryImages;
+use Illuminate\Support\Facades\Storage;
 
 class StoryController extends Controller
 {
@@ -13,37 +14,36 @@ class StoryController extends Controller
         $keyword = $request->input('keyword');
         $categoryId = $request->input('category_id');
 
-        $stories = Story::with(['category','user']);
+        $stories = Story::with(['category', 'user', 'images']);
 
-        if($keyword) {
-            $stories = $stories->where('title', 'like', "%{$keyword}%");
+        if ($keyword) {
+            $stories->where('title', 'like', "%{$keyword}%");
         }
 
-        if($categoryId) {
-            $stories = $stories->where('category_id', $categoryId);
+        if ($categoryId) {
+            $stories->where('category_id', $categoryId);
         }
 
         $stories = $stories->orderBy('id', 'asc')->get();
 
-        $response = [
-            'data' => $stories
-        ];
-        return response()->json($response);
+        return response()->json(['data' => $stories]);
     }
 
     public function getLatestStory()
     {
-        $stories = Story::with(['category','user']);
+        $stories = Story::with(['category', 'user', 'images'])
+            ->orderBy('id', 'desc')
+            ->paginate(6);
 
-        $stories = $stories->orderBy('id', 'asc')->paginate(6);
         return response()->json($stories);
     }
 
     public function getNewestStory()
     {
-        $stories = Story::with(['category','user']);
+        $stories = Story::with(['category', 'user', 'images'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
 
-        $stories = $stories->orderBy('id', 'asc')->paginate(12);
         return response()->json($stories);
     }
 
@@ -55,43 +55,36 @@ class StoryController extends Controller
             'content' => ['required', 'string'],
             'content_image' => ['required', 'array', 'max:5'],
             'content_image.*' => ['file', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
-        ], [
-            'category_id.required' => 'Id category wajib diisi.',
-            'title.required' => 'Nama judul wajib diisi.',
-            'content.required' => 'Isi content wajib diisi.',
-            'content_image.required' => 'Gambar wajib diunggah.',
-            'content_image.max' => 'Maksimal 5 gambar diperbolehkan.',
         ]);
 
         $validatedData['user_id'] = auth()->id();
 
-        $imagePaths = [];
+        // Buat story
+        $story = Story::create($validatedData);
+
+        // Simpan gambar
         if ($request->hasFile('content_image')) {
-            foreach ($request->file('content_image') as $index => $file) {
+            foreach ($request->file('content_image') as $file) {
                 $fileName = $file->getClientOriginalName();
                 $filePath = $file->storeAs('stories_images', $fileName, 'public');
 
-                $fullPath = url("storage/$filePath");
-                $imagePaths[] = $fullPath;
+                $story->images()->create([
+                    'path' => "storage/$filePath"
+                ]);
             }
         }
 
-        $validatedData['content_image'] = json_encode($imagePaths, JSON_UNESCAPED_UNICODE);
-
-        $story = Story::create($validatedData);
-
         return response()->json([
             'message' => 'Story berhasil disimpan',
-            'story' => $story
+            'story' => $story->load('images'),
         ], 201);
     }
 
-
-
     public function show(string $id)
     {
-        $stories = Story::findOrFail($id);
-        return response()->json($stories);
+        $story = Story::with('images')->findOrFail($id);
+
+        return response()->json($story);
     }
 
     public function update(Request $request, string $id)
@@ -101,63 +94,69 @@ class StoryController extends Controller
         $validatedData = $request->validate([
             'title' => ['nullable', 'string', 'max:255'],
             'content' => ['nullable', 'string'],
-            'content_image' => ['nullable', 'array'],
+            'content_image' => ['nullable', 'array', 'max:5'],
             'content_image.*' => ['file', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
-            'remove_image' => ['nullable', 'integer'],
+            'remove_image' => ['nullable', 'array'],
+            'remove_image.*' => ['integer'], // ID gambar yang akan dihapus
         ]);
 
-        $existingImages = json_decode($story->content_image, true) ?? [];
+        // Update data story
+        $story->update($validatedData);
 
-        
+        // Hapus gambar tertentu jika diminta
         if ($request->has('remove_image')) {
-            $removeImageId = $request->input('remove_image');
-            $existingImages = array_filter($existingImages, function ($image) use ($removeImageId) {
-                return $image['id'] != $removeImageId;
-            });
+            foreach ($request->input('remove_image') as $imageId) {
+                $image = $story->images()->find($imageId);
 
-            foreach ($existingImages as $image) {
-                if ($image['id'] == $removeImageId) {
-                    Storage::disk('public')->delete($image['path']);
+                if ($image) {
+                    // Hapus file dari storage
+                    Storage::disk('public')->delete(str_replace('storage/', '', $image->path));
+
+                    // Hapus dari database
+                    $image->delete();
                 }
             }
         }
 
+        // Tambah gambar baru jika ada
         if ($request->hasFile('content_image')) {
-            foreach ($request->file('content_image') as $index => $file) {
-                if (count($existingImages) >= 5) {
-                    return response()->json([
-                        'message' => 'Maksimal 5 gambar diperbolehkan.'
-                    ], 400);
+            $existingImagesCount = $story->images()->count();
+
+            foreach ($request->file('content_image') as $file) {
+                if ($existingImagesCount >= 5) {
+                    return response()->json(['message' => 'Maksimal 5 gambar diperbolehkan.'], 400);
                 }
 
-                $fileName = time() . "_{$index}_" . $file->getClientOriginalName();
+                $fileName = $file->getClientOriginalName();
                 $filePath = $file->storeAs('stories_images', $fileName, 'public');
 
-                $newId = count($existingImages) + 1;
+                $story->images()->create([
+                    'path' => "storage/$filePath"
+                ]);
 
-                $existingImages[] = [
-                    'id' => $newId,
-                    'path' => $filePath
-                ];
+                $existingImagesCount++;
             }
         }
-
-        $validatedData['content_image'] = json_encode(array_values($existingImages));
-
-        $story->update($validatedData);
 
         return response()->json([
             'message' => 'Story berhasil diupdate',
-            'story' => $story
+            'story' => $story->load('images'),
         ], 200);
-    } 
+    }
 
     public function destroy(string $id)
     {
         $story = Story::findOrFail($id);
+
+        // Hapus semua gambar terkait
+        foreach ($story->images as $image) {
+            Storage::disk('public')->delete(str_replace('storage/', '', $image->path));
+            $image->delete();
+        }
+
+        // Hapus story
         $story->delete();
 
         return response()->json(['message' => 'Story berhasil dihapus'], 200);
     }
-
-}   
+}
