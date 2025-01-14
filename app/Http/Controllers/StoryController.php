@@ -159,4 +159,23 @@ class StoryController extends Controller
 
         return response()->json(['message' => 'Story berhasil dihapus'], 200);
     }
+
+    public function getImagesByStoryId($id)
+    {
+        $story = Story::with('images')->findOrFail($id);
+
+        return response()->json([
+            'story_id' => $story->id,
+            'title' => $story->title,
+            'content' => $story->content,
+            'images' => $story->images->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'path' => $image->path,
+                    'created_at' => $image->created_at,
+                ];
+            }),
+        ]);
+    }   
+
 }

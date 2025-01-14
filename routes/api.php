@@ -41,6 +41,8 @@ Route::get('/stories', [StoryController::class, 'index']);
 Route::get('/stories/{storyId}', [StoryController::class, 'show']);
 Route::get('/get/latest-stories', [StoryController::class, 'getLatestStory']);
 Route::get('/get/newest-stories', [StoryController::class, 'getNewestStory']);
+Route::get('/stories/{id}/images', [StoryController::class, 'getImagesByStoryId']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/stories/add', [StoryController::class, 'store']);
