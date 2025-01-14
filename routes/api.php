@@ -52,7 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // Route Category
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{categoryId}', [CategoryController::class, 'show']);
-Route::get('/stories/category', [CategoryController::class, 'getStoriesByCategory']);
+Route::get('/get-categories', [CategoryController::class, 'getAllCategoriesWithStories']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/categories/add', [CategoryController::class, 'store']);

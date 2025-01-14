@@ -62,34 +62,30 @@ class CategoryController extends Controller
         return response()->json(['message' => 'Category berhasil dihapus'], 200);
     }
 
-    public function getStoriesByCategory($categoryId)
+    public function getAllCategoriesWithStories()
     {
-
-        $category = Category::with(['stories' => function ($query) {
+        $categories = Category::with(['stories' => function ($query) {
             $query->orderBy('id', 'asc');
-        }])->find($categoryId);
+        }])->get();
 
-        if (!$category || $category->stories->isEmpty()) {
-            return response()->json(['message' => 'Tidak ada story untuk kategori ini.'], 404);
-        }
-
-        $response = [
-            'category_id' => $category->id,
-            'category_name' => $category->name,
-            'stories' => $category->stories->map(function ($story) {
-                return [
-                    'story_id' => $story->id,
-                    'title' => $story->title,
-                    'author' => $story->user->name,
-                    'content' => $story->content,
-                    'cover' => $story->images[0],
-                    'author_img' => $story->user->imageLink,
-                    'created_at' => $story->created_at->toDateTimeString(),
-                ];
-            }),
-        ];
+        $response = $categories->map(function ($category) {
+            return [
+                'category_id' => $category->id,
+                'category_name' => $category->name,
+                'stories' => $category->stories->map(function ($story) {
+                    return [
+                        'story_id' => $story->id,
+                        'title' => $story->title,
+                        'author' => $story->user->name,
+                        'content' => $story->content,
+                        'cover' => $story->images[0],
+                        'author_img' => $story->user->imageLink,
+                        'created_at' => $story->created_at->toDateTimeString(),
+                    ];
+                }),
+            ];
+        });
 
         return response()->json($response, 200);
     }
-
 }
