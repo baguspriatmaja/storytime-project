@@ -31,6 +31,7 @@ class StoryController extends Controller
                 'id' => $story->id,
                 'title' => $story->title,
                 'content' => $story->content,
+                'created_at' => $story->created_at->toDateTimeString(),
                 'category' => [
                     'id' => $story->category->id,
                     'name' => $story->category->name,
