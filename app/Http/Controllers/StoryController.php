@@ -26,7 +26,33 @@ class StoryController extends Controller
 
         $stories = $stories->orderBy('id', 'asc')->get();
 
-        return response()->json(['data' => $stories]);
+        $formattedStories = $stories->map(function ($story) {
+            return [
+                'id' => $story->id,
+                'title' => $story->title,
+                'content' => $story->content,
+                'category' => [
+                    'id' => $story->category->id,
+                    'name' => $story->category->name,
+                ],
+                'user' => [
+                    'id' => $story->user->id,
+                    'username' => $story->user->name,
+                    'imagelink' => $story->user->imageLink,
+                ],
+                'images' => $story->images->map(function ($image) {
+                    return [
+                        'id' => $image->id,
+                        'story_id' => $image->story_id,
+                        'path' => $image->path,
+                    ];
+                }),
+            ];
+        }); 
+
+        return response()->json([
+            'data' => $formattedStories,
+        ]);
     }
 
     public function getLatestStory()

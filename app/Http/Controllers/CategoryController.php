@@ -76,7 +76,7 @@ class CategoryController extends Controller
                     return [
                         'story_id' => $story->id,
                         'title' => $story->title,
-                        'author' => $story->user->name,
+                        'username' => $story->user->username,
                         'content' => $story->content,
                         'cover' => $story->images[0],
                         'author_img' => $story->user->imageLink,
