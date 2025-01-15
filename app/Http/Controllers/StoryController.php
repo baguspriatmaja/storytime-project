@@ -84,7 +84,7 @@ class StoryController extends Controller
             'content' => $story->content,
             'images' => $story->images->map(function ($image) {
                 return [
-                    'id' => $image->id,
+                    'image_id' => $image->id,
                     'path' => $image->path,
                     'created_at' => $image->created_at,
                 ];
