@@ -47,6 +47,86 @@ class StoryController extends Controller
         return response()->json($stories);
     }
 
+    public function getImagesByStoryId($id)
+    {
+        $story = Story::with('images')->findOrFail($id);
+
+        return response()->json([
+            'story_id' => $story->id,
+            'title' => $story->title,
+            'content' => $story->content,
+            'images' => $story->images->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'path' => $image->path,
+                    'created_at' => $image->created_at,
+                ];
+            }),
+        ]);
+    }   
+
+    public function getMyStories(Request $request)
+    {
+        
+        $userId = auth()->id();
+
+        $stories = Story::with(['category', 'images'])
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'asc')
+            ->paginate(4);
+
+        if ($stories->isEmpty()) {
+            return response()->json(['message' => 'Belum ada story yang ditambahkan.'], 200);
+        }
+
+        return response()->json($stories, 200);
+    }
+
+
+    public function getStoriesAscending()
+    {
+        $stories = Story::with(['category', 'user', 'images'])
+            ->orderBy('title', 'asc') // Mengurutkan berdasarkan judul secara ascending (A-Z)
+            ->get();
+
+        return response()->json(['data' => $stories], 200);
+    }
+
+    public function getStoriesDescending()
+    {   
+        $stories = Story::with(['category', 'user', 'images'])
+            ->orderBy('title', 'desc') // Mengurutkan berdasarkan judul secara descending (Z-A)
+            ->get();
+
+        return response()->json(['data' => $stories], 200);
+    }
+
+    public function getSimilarStories($storyId)
+    {
+        // Ambil story berdasarkan ID, termasuk relasi kategori
+        $currentStory = Story::with('category')->find($storyId);
+
+        // Jika story tidak ditemukan, kembalikan pesan error
+        if (!$currentStory) {
+            return response()->json(['message' => 'Story tidak ditemukan.'], 404);
+        }
+
+        // Ambil story lain yang memiliki kategori sama dengan story ini
+        $similarStories = Story::with(['category', 'user', 'images'])
+            ->where('category_id', $currentStory->category_id) // Cari berdasarkan kategori yang sama
+            ->where('id', '!=', $storyId) // Kecualikan story yang sedang dilihat
+            ->orderBy('created_at', 'desc') // Urutkan dari yang terbaru
+            ->paginate(3); // Batasi 3 per halaman
+
+        // Jika tidak ada story yang mirip, kembalikan pesan kosong
+        if ($similarStories->isEmpty()) {
+            return response()->json(['message' => 'Tidak ada story serupa yang ditemukan.'], 200);
+        }
+
+        return response()->json($similarStories, 200);
+    }
+
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -159,23 +239,5 @@ class StoryController extends Controller
 
         return response()->json(['message' => 'Story berhasil dihapus'], 200);
     }
-
-    public function getImagesByStoryId($id)
-    {
-        $story = Story::with('images')->findOrFail($id);
-
-        return response()->json([
-            'story_id' => $story->id,
-            'title' => $story->title,
-            'content' => $story->content,
-            'images' => $story->images->map(function ($image) {
-                return [
-                    'id' => $image->id,
-                    'path' => $image->path,
-                    'created_at' => $image->created_at,
-                ];
-            }),
-        ]);
-    }   
 
 }

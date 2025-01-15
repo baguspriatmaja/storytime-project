@@ -42,9 +42,13 @@ Route::get('/stories/{storyId}', [StoryController::class, 'show']);
 Route::get('/get/latest-stories', [StoryController::class, 'getLatestStory']);
 Route::get('/get/newest-stories', [StoryController::class, 'getNewestStory']);
 Route::get('/stories/{id}/images', [StoryController::class, 'getImagesByStoryId']);
+Route::get('/stories/{id}/similar', [StoryController::class, 'getSimilarStories']);
+Route::get('/ascending', [StoryController::class, 'getStoriesAscending']);
+Route::get('/descending', [StoryController::class, 'getStoriesDescending']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/my-stories', [StoryController::class, 'getMyStories']);
     Route::post('/stories/add', [StoryController::class, 'store']);
     Route::post('/stories/{storyId}/update', [StoryController::class, 'update']);
     Route::delete('/stories/{storyId}/delete', [StoryController::class, 'destroy']);
