@@ -28,22 +28,22 @@ class StoryController extends Controller
 
         $formattedStories = $stories->map(function ($story) {
             return [
-                'id' => $story->id,
+                'story_id' => $story->id,
                 'title' => $story->title,
                 'content' => $story->content,
                 'created_at' => $story->created_at->toDateTimeString(),
                 'category' => [
-                    'id' => $story->category->id,
+                    'category_id' => $story->category->id,
                     'name' => $story->category->name,
                 ],
                 'user' => [
-                    'id' => $story->user->id,
+                    'user_id' => $story->user->id,
                     'username' => $story->user->name,
                     'imagelink' => $story->user->imageLink,
                 ],
                 'images' => $story->images->map(function ($image) {
                     return [
-                        'id' => $image->id,
+                        'image_id' => $image->id,
                         'story_id' => $image->story_id,
                         'path' => $image->path,
                     ];
