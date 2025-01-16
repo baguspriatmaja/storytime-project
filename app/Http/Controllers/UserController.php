@@ -113,8 +113,8 @@ class UserController extends Controller
     public function updateProfile(Request $request)
     {
     $validator = Validator::make($request->all(), [
-        'name' => 'nullable|string|max:255', // Opsional untuk memperbarui nama
-        'about' => 'nullable|string|max:500',
+        'name' => 'sometimes|string|max:255',
+        'about' => 'sometimes|string|max:500',
         'old_password' => 'nullable|string|min:8',
         'new_password' => 'nullable|string|min:8|different:old_password',
         'confirm_new_password' => 'nullable|same:new_password',
@@ -172,7 +172,7 @@ class UserController extends Controller
     public function updateProfileImage(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'imageLink' => 'required|file|mimes:jpeg,png,jpg,gif|max:2048',
+            'imageLink' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {

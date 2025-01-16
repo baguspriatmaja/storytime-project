@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Story;
-use App\Models\StoryImages;
 use Illuminate\Support\Facades\Storage;
 
 class StoryController extends Controller
@@ -59,7 +58,7 @@ class StoryController extends Controller
     public function getLatestStory()
     {
         $stories = Story::with(['category', 'user', 'images'])
-            ->orderBy('id', 'desc')
+            ->orderBy('id', 'asc')
             ->paginate(6);
 
         return response()->json($stories);
@@ -68,7 +67,7 @@ class StoryController extends Controller
     public function getNewestStory()
     {
         $stories = Story::with(['category', 'user', 'images'])
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at', 'asc')
             ->paginate(12);
 
         return response()->json($stories);
@@ -122,7 +121,7 @@ class StoryController extends Controller
     public function getStoriesDescending()
     {   
         $stories = Story::with(['category', 'user', 'images'])
-            ->orderBy('title', 'desc') // Mengurutkan berdasarkan judul secara descending (Z-A)
+            ->orderBy('title', 'desc') 
             ->get();
 
         return response()->json(['data' => $stories], 200);
@@ -130,22 +129,19 @@ class StoryController extends Controller
 
     public function getSimilarStories($storyId)
     {
-        // Ambil story berdasarkan ID, termasuk relasi kategori
+        
         $currentStory = Story::with('category')->find($storyId);
 
-        // Jika story tidak ditemukan, kembalikan pesan error
         if (!$currentStory) {
             return response()->json(['message' => 'Story tidak ditemukan.'], 404);
         }
 
-        // Ambil story lain yang memiliki kategori sama dengan story ini
         $similarStories = Story::with(['category', 'user', 'images'])
-            ->where('category_id', $currentStory->category_id) // Cari berdasarkan kategori yang sama
-            ->where('id', '!=', $storyId) // Kecualikan story yang sedang dilihat
-            ->orderBy('created_at', 'desc') // Urutkan dari yang terbaru
-            ->paginate(3); // Batasi 3 per halaman
+            ->where('category_id', $currentStory->category_id) 
+            ->where('id', '!=', $storyId) 
+            ->orderBy('created_at', 'desc') 
+            ->paginate(3); 
 
-        // Jika tidak ada story yang mirip, kembalikan pesan kosong
         if ($similarStories->isEmpty()) {
             return response()->json(['message' => 'Tidak ada story serupa yang ditemukan.'], 200);
         }
@@ -166,10 +162,8 @@ class StoryController extends Controller
 
         $validatedData['user_id'] = auth()->id();
 
-        // Buat story
         $story = Story::create($validatedData);
 
-        // Simpan gambar
         if ($request->hasFile('content_image')) {
             foreach ($request->file('content_image') as $file) {
                 $fileName = $file->getClientOriginalName();
@@ -207,25 +201,20 @@ class StoryController extends Controller
             'remove_image.*' => ['integer'], // ID gambar yang akan dihapus
         ]);
 
-        // Update data story
         $story->update($validatedData);
 
-        // Hapus gambar tertentu jika diminta
         if ($request->has('remove_image')) {
             foreach ($request->input('remove_image') as $imageId) {
                 $image = $story->images()->find($imageId);
 
                 if ($image) {
-                    // Hapus file dari storage
                     Storage::disk('public')->delete(str_replace('storage/', '', $image->path));
 
-                    // Hapus dari database
                     $image->delete();
                 }
             }
         }
 
-        // Tambah gambar baru jika ada
         if ($request->hasFile('content_image')) {
             $existingImagesCount = $story->images()->count();
 
@@ -255,13 +244,11 @@ class StoryController extends Controller
     {
         $story = Story::findOrFail($id);
 
-        // Hapus semua gambar terkait
         foreach ($story->images as $image) {
             Storage::disk('public')->delete(str_replace('storage/', '', $image->path));
             $image->delete();
         }
 
-        // Hapus story
         $story->delete();
 
         return response()->json(['message' => 'Story berhasil dihapus'], 200);
