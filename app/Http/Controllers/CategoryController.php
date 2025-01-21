@@ -51,7 +51,10 @@ class CategoryController extends Controller
     {
         $category = Category::findOrFail($id);
         $category->update($request->all());
-        return response()->json(['message' => 'Category berhasil diupdate'], 200);
+        return response()->json([
+            'message' => 'Category berhasil diupdate',
+            'data' => $category
+        ], 200);
     }
 
     public function destroy(string $id)
@@ -59,7 +62,10 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
         $category->delete();
 
-        return response()->json(['message' => 'Category berhasil dihapus'], 200);
+        return response()->json([
+            'message' => 'Category berhasil dihapus',
+            'data' => $category
+        ], 200);
     }
 
     public function getAllCategoriesWithStories()
