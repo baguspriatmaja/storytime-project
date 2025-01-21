@@ -183,21 +183,42 @@ class StoryController extends Controller
 
     public function show(string $id)
     {
-        $story = Story::with('images')->findOrFail($id);
+        $story = Story::with('category', 'images', 'user')->findOrFail($id);
+
+        $similarStories = Story::with(['category', 'user', 'images'])
+            ->where('category_id', $story->category->id) 
+            ->where('id', '!=', $story->id) 
+            ->orderBy('created_at', 'desc') 
+            ->take(3)
+            ->get();
 
         return response()->json([
-            'story_id' => $story->id,
-            'category_id' =>$story->category->id,
-            'user_id' => $story->user->id,
-            'username' => $story->user->username,
-            'author_img' => $story->user->imageLink,
-            'title' => $story->title,
-            'content' => $story->content,
-            'created_at' => $story->created_at->toDateTimeString(),
-            'updated_at' => $story->updated_at->toDateTimeString(),
-            'images' => $story->images,
+            'story' => [
+                'story_id' => $story->id,
+                'category_id' => $story->category->id,
+                'user_id' => $story->user->id,
+                'username' => $story->user->username,
+                'author_img' => $story->user->imageLink,
+                'title' => $story->title,
+                'content' => $story->content,
+                'created_at' => $story->created_at->toDateTimeString(),
+                'updated_at' => $story->updated_at->toDateTimeString(),
+                'images' => $story->images,
+            ],
+            'similar_stories' => $similarStories->map(function ($similar) {
+                return [
+                    'story_id' => $similar->id,
+                    'category_id' => $similar->category->id,
+                    'user_id' => $similar->user->id,
+                    'username' => $similar->user->username,
+                    'title' => $similar->title,
+                    'created_at' => $similar->created_at->toDateTimeString(),   
+                    'images' => $similar->images,
+                ];
+            }),
         ]);
     }
+
 
     public function update(Request $request, string $id)
     {
