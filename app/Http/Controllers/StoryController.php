@@ -193,18 +193,16 @@ class StoryController extends Controller
             ->get();
 
         return response()->json([
-            'story' => [
-                'story_id' => $story->id,
-                'category_id' => $story->category->id,
-                'user_id' => $story->user->id,
-                'username' => $story->user->username,
-                'author_img' => $story->user->imageLink,
-                'title' => $story->title,
-                'content' => $story->content,
-                'created_at' => $story->created_at->toDateTimeString(),
-                'updated_at' => $story->updated_at->toDateTimeString(),
-                'images' => $story->images,
-            ],
+            'story_id' => $story->id,
+            'category_id' => $story->category->id,
+            'user_id' => $story->user->id,
+            'username' => $story->user->username,
+            'author_img' => $story->user->imageLink,
+            'title' => $story->title,
+            'content' => $story->content,
+            'created_at' => $story->created_at->toDateTimeString(),
+            'updated_at' => $story->updated_at->toDateTimeString(),
+            'images' => $story->images,
             'similar_stories' => $similarStories->map(function ($similar) {
                 return [
                     'story_id' => $similar->id,
