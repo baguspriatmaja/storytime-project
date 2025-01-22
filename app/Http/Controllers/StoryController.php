@@ -210,6 +210,7 @@ class StoryController extends Controller
                     'user_id' => $similar->user->id,
                     'username' => $similar->user->username,
                     'title' => $similar->title,
+                    'content' => $similar->content,
                     'created_at' => $similar->created_at->toDateTimeString(),   
                     'images' => $similar->images,
                 ];
