@@ -209,6 +209,7 @@ class StoryController extends Controller
                     'category_id' => $similar->category->id,
                     'user_id' => $similar->user->id,
                     'username' => $similar->user->username,
+                    'author_img' => $similar->user->imageLink,
                     'title' => $similar->title,
                     'content' => $similar->content,
                     'created_at' => $similar->created_at->toDateTimeString(),   
