@@ -202,7 +202,7 @@ class StoryController extends Controller
             'content' => $story->content,
             'created_at' => $story->created_at->toDateTimeString(),
             'updated_at' => $story->updated_at->toDateTimeString(),
-            'images' => $story->images,
+            'content_image' => $story->images,
             'similar_stories' => $similarStories->map(function ($similar) {
                 return [
                     'story_id' => $similar->id,
