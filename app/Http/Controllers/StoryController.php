@@ -37,7 +37,7 @@ class StoryController extends Controller
                 ],
                 'user' => [
                     'user_id' => $story->user->id,
-                    'username' => $story->user->name,
+                    'username' => $story->user->username,
                     'imagelink' => $story->user->imageLink,
                 ],
                 'images' => $story->images->map(function ($image) {
@@ -230,7 +230,7 @@ class StoryController extends Controller
             'content_image' => ['nullable', 'array', 'max:5'],
             'content_image.*' => ['file', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
             'remove_image' => ['nullable', 'array'],
-            'remove_image.*' => ['integer'], // ID gambar yang akan dihapus
+            'remove_image.*' => ['integer'],
         ]);
 
         $story->update($validatedData);
