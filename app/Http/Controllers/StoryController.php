@@ -225,6 +225,7 @@ class StoryController extends Controller
         $story = Story::findOrFail($id);
 
         $validatedData = $request->validate([
+            'category_id' => ['nullable', 'integer'],
             'title' => ['nullable', 'string', 'max:255'],
             'content' => ['nullable', 'string'],
             'content_image' => ['nullable', 'array', 'max:5'],
