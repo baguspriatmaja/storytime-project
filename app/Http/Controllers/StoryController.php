@@ -98,8 +98,8 @@ class StoryController extends Controller
 
         $stories = Story::with(['category', 'images'])
             ->where('user_id', $userId)
-            ->orderBy('created_at', 'asc')
-            ->paginate(4);
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
 
         if ($stories->isEmpty()) {
             return response()->json(['message' => 'Belum ada story yang ditambahkan.'], 200);
