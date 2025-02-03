@@ -58,20 +58,55 @@ class StoryController extends Controller
     public function getLatestStory()
     {
         $stories = Story::with(['category', 'user', 'images'])
-            ->orderBy('id', 'asc')
+            ->orderBy('created_at', 'desc')
             ->paginate(6);
 
         return response()->json($stories);
     }
 
-    public function getNewestStory()
-    {
-        $stories = Story::with(['category', 'user', 'images'])
-            ->orderBy('created_at', 'asc')
-            ->paginate(12);
+    // public function getNewestStory()
+    // {
+    //     $stories = Story::with(['category', 'user', 'images'])
+    //         ->orderBy('created_at', 'asc')
+    //         ->paginate(12);
 
-        return response()->json($stories);
+    //     return response()->json($stories);
+    // }
+
+    public function getStories(Request $request)
+    {
+        $orderType = $request->query('order', 'newest'); 
+        $perPage = 12;
+
+        switch ($orderType) {
+            case 'oldest':
+                $orderBy = ['created_at', 'asc'];
+                $perPage = 12;
+                break;
+            case 'asc':
+                $orderBy = ['title', 'asc'];
+                $perPage = Story::count(); 
+                break;
+            case 'desc':
+                $orderBy = ['title', 'desc'];
+                $perPage = Story::count();
+                break;
+            default:
+                $orderBy = ['created_at', 'asc'];
+                break;
+        }
+
+        $storiesQuery = Story::with(['category', 'user', 'images'])->orderBy($orderBy[0], $orderBy[1]);
+
+        if (in_array($orderType, ['asc', 'desc'])) {
+            $stories = $storiesQuery->get();
+        } else {
+            $stories = $storiesQuery->paginate($perPage);
+        }
+
+        return response()->json(['data' => $stories], 200);
     }
+
 
     public function getImagesByStoryId($id)
     {
@@ -109,23 +144,23 @@ class StoryController extends Controller
     }
 
 
-    public function getStoriesAscending()
-    {
-        $stories = Story::with(['category', 'user', 'images'])
-            ->orderBy('title', 'asc') // Mengurutkan berdasarkan judul secara ascending (A-Z)
-            ->get();
+    // public function getStoriesAscending()
+    // {
+    //     $stories = Story::with(['category', 'user', 'images'])
+    //         ->orderBy('title', 'asc') // Mengurutkan berdasarkan judul secara ascending (A-Z)
+    //         ->get();
 
-        return response()->json(['data' => $stories], 200);
-    }
+    //     return response()->json(['data' => $stories], 200);
+    // }
 
-    public function getStoriesDescending()
-    {   
-        $stories = Story::with(['category', 'user', 'images'])
-            ->orderBy('title', 'desc') 
-            ->get();
+    // public function getStoriesDescending()
+    // {   
+    //     $stories = Story::with(['category', 'user', 'images'])
+    //         ->orderBy('title', 'desc') 
+    //         ->get();
 
-        return response()->json(['data' => $stories], 200);
-    }
+    //     return response()->json(['data' => $stories], 200);
+    // }
 
     public function getSimilarStories($storyId)
     {

@@ -40,10 +40,11 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/stories', [StoryController::class, 'index']);
 Route::get('/stories/{storyId}', [StoryController::class, 'show']);
 Route::get('/get/latest-stories', [StoryController::class, 'getLatestStory']);
-Route::get('/get/newest-stories', [StoryController::class, 'getNewestStory']);
+// Route::get('/get/newest-stories', [StoryController::class, 'getNewestStory']);
 Route::get('/stories/{id}/images', [StoryController::class, 'getImagesByStoryId']);
-Route::get('/ascending', [StoryController::class, 'getStoriesAscending']);
-Route::get('/descending', [StoryController::class, 'getStoriesDescending']);
+// Route::get('/ascending', [StoryController::class, 'getStoriesAscending']);
+// Route::get('/descending', [StoryController::class, 'getStoriesDescending']);
+Route::get('/sort-by', [StoryController::class, 'getStories']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
