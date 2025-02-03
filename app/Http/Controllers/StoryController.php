@@ -38,7 +38,7 @@ class StoryController extends Controller
                 'user' => [
                     'user_id' => $story->user->id,
                     'username' => $story->user->username,
-                    'imagelink' => $story->user->imageLink,
+                    'imageLink' => $story->user->imageLink,
                 ],
                 'images' => $story->images->map(function ($image) {
                     return [
