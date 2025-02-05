@@ -48,6 +48,24 @@ class BookmarkController extends Controller
         ], 201);
     }
 
+    public function getMyBookmarks(Request $request)
+    {
+        $userId = auth()->id();
+
+        $bookmarks = Bookmark::with(['story'])
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'asc')
+            ->paginate(12);
+
+        if ($bookmarks->isEmpty()) {
+            return response()->json(['message' => 'Belum ada Bookmark yang ditambahkan.'], 200);
+        }
+
+        return response()->json([
+            'bookmark' => $bookmarks
+        ], 200); 
+    }
+
     public function show(string $id)
     {
         $bookmark = Bookmark::with('story')->findOrFail($id);

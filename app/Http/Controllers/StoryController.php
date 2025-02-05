@@ -79,20 +79,16 @@ class StoryController extends Controller
         $perPage = 12;
 
         switch ($orderType) {
-            case 'oldest':
-                $orderBy = ['created_at', 'desc'];
-                $perPage = 12;
-                break;
-            case 'asc':
+            case 'ascending':
                 $orderBy = ['title', 'asc'];
                 $perPage = Story::count(); 
                 break;
-            case 'desc':
+            case 'descending':
                 $orderBy = ['title', 'desc'];
                 $perPage = Story::count();
                 break;
             default:
-                $orderBy = ['created_at', 'asc'];
+                $orderBy = ['created_at', 'desc'];
                 break;
         }
 
@@ -133,7 +129,7 @@ class StoryController extends Controller
 
         $stories = Story::with(['category', 'images'])
             ->where('user_id', $userId)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at', 'asc')
             ->paginate(12);
 
         if ($stories->isEmpty()) {
