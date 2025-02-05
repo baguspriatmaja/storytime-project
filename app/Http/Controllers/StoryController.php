@@ -8,23 +8,113 @@ use Illuminate\Support\Facades\Storage;
 
 class StoryController extends Controller
 {
-    public function index(Request $request)
+    // public function index(Request $request)
+    // {
+    //     $keyword = $request->input('keyword');
+    //     $categoryId = $request->input('category_id');
+
+    //     $stories = Story::with(['category', 'user', 'images', 'bookmarks']);
+
+    //     if ($keyword) {
+    //         $stories->where('title', 'like', "%{$keyword}%");
+    //     }
+
+    //     if ($categoryId) {
+    //         $stories->where('category_id', $categoryId);
+    //     }
+
+    //     $stories = $stories->orderBy('id', 'asc')->get();
+
+    //     $formattedStories = $stories->map(function ($story) {
+    //         return [
+    //             'story_id' => $story->id,
+    //             'title' => $story->title,
+    //             'content' => $story->content,
+    //             'created_at' => $story->created_at->toDateTimeString(),
+    //             'category' => [
+    //                 'category_id' => $story->category->id,
+    //                 'name' => $story->category->name,
+    //             ],
+    //             'user' => [
+    //                 'user_id' => $story->user->id,
+    //                 'username' => $story->user->username,
+    //                 'imageLink' => $story->user->imageLink,
+    //             ],
+    //             'images' => $story->images->map(function ($image) {
+    //                 return [
+    //                     'image_id' => $image->id,
+    //                     'story_id' => $image->story_id,
+    //                     'path' => $image->path,
+    //                 ];
+    //             }),
+    //             'bookmarks' => [
+    //                 'total_bookmarks' => $story->bookmarks->count(),
+    //             ],
+    //         ];
+    //     }); 
+
+    //     return response()->json([
+    //         'data' => $formattedStories,
+    //     ]);
+    // }
+
+    public function getLatestStory()
+    {
+        $stories = Story::with(['category', 'user', 'images'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(6);
+
+        return response()->json($stories);
+    }
+
+    // public function getNewestStory()
+    // {
+    //     $stories = Story::with(['category', 'user', 'images'])
+    //         ->orderBy('created_at', 'asc')
+    //         ->paginate(12);
+
+    //     return response()->json($stories);
+    // }
+
+    public function getStories(Request $request)
     {
         $keyword = $request->input('keyword');
         $categoryId = $request->input('category_id');
+        $orderType = $request->query('order', 'newest');
+        $perPage = $request->query('per_page', 12);
 
-        $stories = Story::with(['category', 'user', 'images']);
+        
+        $storiesQuery = Story::with(['category', 'user', 'images', 'bookmarks']);
 
+        
         if ($keyword) {
-            $stories->where('title', 'like', "%{$keyword}%");
+            $storiesQuery->where('title', 'like', "%{$keyword}%");
         }
 
+        
         if ($categoryId) {
-            $stories->where('category_id', $categoryId);
+            $storiesQuery->where('category_id', $categoryId);
         }
 
-        $stories = $stories->orderBy('id', 'asc')->get();
+        switch ($orderType) {
+            // case 'popular':
+            //     $storiesQuery->orderBy('bookmarks', 'asc');
+            //     break;
+            case 'ascending':
+                $storiesQuery->orderBy('title', 'asc');
+                break;
+            case 'descending':
+                $storiesQuery->orderBy('title', 'desc');
+                break;
+            default:
+                $storiesQuery->orderBy('created_at', 'desc');
+                break;
+        }
 
+        // Mendapatkan data dengan pagination atau semua data
+        $stories = $storiesQuery->paginate($perPage);
+
+        // Format respons
         $formattedStories = $stories->map(function ($story) {
             return [
                 'story_id' => $story->id,
@@ -47,61 +137,23 @@ class StoryController extends Controller
                         'path' => $image->path,
                     ];
                 }),
+                'bookmarks' => [
+                    'total_bookmarks' => $story->bookmarks->count(),
+                ],
             ];
-        }); 
+        });
 
         return response()->json([
             'data' => $formattedStories,
+            'pagination' => [
+                'total' => $stories->total(),
+                'per_page' => $stories->perPage(),
+                'current_page' => $stories->currentPage(),
+                'last_page' => $stories->lastPage(),
+            ],
         ]);
     }
 
-    public function getLatestStory()
-    {
-        $stories = Story::with(['category', 'user', 'images'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(6);
-
-        return response()->json($stories);
-    }
-
-    // public function getNewestStory()
-    // {
-    //     $stories = Story::with(['category', 'user', 'images'])
-    //         ->orderBy('created_at', 'asc')
-    //         ->paginate(12);
-
-    //     return response()->json($stories);
-    // }
-
-    public function getStories(Request $request)
-    {
-        $orderType = $request->query('order', 'newest'); 
-        $perPage = 12;
-
-        switch ($orderType) {
-            case 'ascending':
-                $orderBy = ['title', 'asc'];
-                $perPage = Story::count(); 
-                break;
-            case 'descending':
-                $orderBy = ['title', 'desc'];
-                $perPage = Story::count();
-                break;
-            default:
-                $orderBy = ['created_at', 'desc'];
-                break;
-        }
-
-        $storiesQuery = Story::with(['category', 'user', 'images'])->orderBy($orderBy[0], $orderBy[1]);
-
-        if (in_array($orderType, ['asc', 'desc'])) {
-            $stories = $storiesQuery->get();
-        } else {
-            $stories = $storiesQuery->paginate($perPage);
-        }
-
-        return response()->json(['data' => $stories], 200);
-    }
 
 
     public function getImagesByStoryId($id)

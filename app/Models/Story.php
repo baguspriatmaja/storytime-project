@@ -25,4 +25,9 @@ class Story extends Model
     {
         return $this->hasMany(StoryImages::class);
     }
+
+    public function bookmarks()
+    {
+        return $this->hasMany(Bookmark::class);
+    }
 }
