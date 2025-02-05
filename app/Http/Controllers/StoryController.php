@@ -80,7 +80,7 @@ class StoryController extends Controller
 
         switch ($orderType) {
             case 'oldest':
-                $orderBy = ['created_at', 'asc'];
+                $orderBy = ['created_at', 'desc'];
                 $perPage = 12;
                 break;
             case 'asc':

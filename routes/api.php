@@ -68,7 +68,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Route Bookmarks
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('/bookmarks', BookmarkController::class);
+    Route::apiResource('/bookmarks', BookmarkController::class)->except(['show','destroy']);
+    Route::get('/bookmarks/{id}', [BookmarkController::class, 'show']);
+    Route::delete('/bookmarks/{id}', [BookmarkController::class, 'destroy']);
 });
 
 
