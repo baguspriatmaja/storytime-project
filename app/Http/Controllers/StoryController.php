@@ -76,7 +76,7 @@ class StoryController extends Controller
     //     return response()->json($stories);
     // }
 
-    public function getStories(Request $request)
+    public function index(Request $request)
     {
         $keyword = $request->input('keyword');
         $categoryId = $request->input('category_id');

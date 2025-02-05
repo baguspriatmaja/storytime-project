@@ -44,7 +44,7 @@ Route::get('/get/latest-stories', [StoryController::class, 'getLatestStory']);
 Route::get('/stories/{id}/images', [StoryController::class, 'getImagesByStoryId']);
 // Route::get('/ascending', [StoryController::class, 'getStoriesAscending']);
 // Route::get('/descending', [StoryController::class, 'getStoriesDescending']);
-Route::get('/sort-by', [StoryController::class, 'getStories']);
+// Route::get('/sort-by', [StoryController::class, 'index']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
