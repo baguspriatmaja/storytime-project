@@ -8,74 +8,6 @@ use Illuminate\Support\Facades\Storage;
 
 class StoryController extends Controller
 {
-    // public function index(Request $request)
-    // {
-    //     $keyword = $request->input('keyword');
-    //     $categoryId = $request->input('category_id');
-
-    //     $stories = Story::with(['category', 'user', 'images', 'bookmarks']);
-
-    //     if ($keyword) {
-    //         $stories->where('title', 'like', "%{$keyword}%");
-    //     }
-
-    //     if ($categoryId) {
-    //         $stories->where('category_id', $categoryId);
-    //     }
-
-    //     $stories = $stories->orderBy('id', 'asc')->get();
-
-    //     $formattedStories = $stories->map(function ($story) {
-    //         return [
-    //             'story_id' => $story->id,
-    //             'title' => $story->title,
-    //             'content' => $story->content,
-    //             'created_at' => $story->created_at->toDateTimeString(),
-    //             'category' => [
-    //                 'category_id' => $story->category->id,
-    //                 'name' => $story->category->name,
-    //             ],
-    //             'user' => [
-    //                 'user_id' => $story->user->id,
-    //                 'username' => $story->user->username,
-    //                 'imageLink' => $story->user->imageLink,
-    //             ],
-    //             'images' => $story->images->map(function ($image) {
-    //                 return [
-    //                     'image_id' => $image->id,
-    //                     'story_id' => $image->story_id,
-    //                     'path' => $image->path,
-    //                 ];
-    //             }),
-    //             'bookmarks' => [
-    //                 'total_bookmarks' => $story->bookmarks->count(),
-    //             ],
-    //         ];
-    //     }); 
-
-    //     return response()->json([
-    //         'data' => $formattedStories,
-    //     ]);
-    // }
-
-    public function getLatestStory()
-    {
-        $stories = Story::with(['category', 'user', 'images'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(6);
-
-        return response()->json($stories);
-    }
-
-    // public function getNewestStory()
-    // {
-    //     $stories = Story::with(['category', 'user', 'images'])
-    //         ->orderBy('created_at', 'asc')
-    //         ->paginate(12);
-
-    //     return response()->json($stories);
-    // }
-
     public function index(Request $request)
     {
         $keyword = $request->input('keyword');
@@ -97,9 +29,9 @@ class StoryController extends Controller
         }
 
         switch ($orderType) {
-            // case 'popular':
-            //     $storiesQuery->orderBy('bookmarks', 'asc');
-            //     break;
+            case 'popular':
+                $storiesQuery->withCount('bookmarks')->orderBy('bookmarks_count', 'desc');
+                break;
             case 'ascending':
                 $storiesQuery->orderBy('title', 'asc');
                 break;
@@ -111,10 +43,9 @@ class StoryController extends Controller
                 break;
         }
 
-        // Mendapatkan data dengan pagination atau semua data
+        
         $stories = $storiesQuery->paginate($perPage);
 
-        // Format respons
         $formattedStories = $stories->map(function ($story) {
             return [
                 'story_id' => $story->id,
@@ -138,7 +69,7 @@ class StoryController extends Controller
                     ];
                 }),
                 'bookmarks' => [
-                    'total_bookmarks' => $story->bookmarks->count(),
+                    'bookmarks_count' => $story->bookmarks->count(),
                 ],
             ];
         });
@@ -154,7 +85,22 @@ class StoryController extends Controller
         ]);
     }
 
+    public function getLatestStory()
+    {
+        $stories = Story::with(['category', 'user', 'images'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(6);
 
+        return response()->json([
+            'story_id' => $stories->first()->id,
+            'title' => $stories->first()->title,
+            'content' => $stories->first()->content,
+            'cover' => $stories->first()->images[0],
+            'author_img' => $stories->first()->user->imageLink,
+            'created_at' => $stories->first()->created_at->toDateTimeString(),
+        ],
+            200 );
+    }
 
     public function getImagesByStoryId($id)
     {
@@ -190,25 +136,6 @@ class StoryController extends Controller
 
         return response()->json($stories, 200);
     }
-
-
-    // public function getStoriesAscending()
-    // {
-    //     $stories = Story::with(['category', 'user', 'images'])
-    //         ->orderBy('title', 'asc') // Mengurutkan berdasarkan judul secara ascending (A-Z)
-    //         ->get();
-
-    //     return response()->json(['data' => $stories], 200);
-    // }
-
-    // public function getStoriesDescending()
-    // {   
-    //     $stories = Story::with(['category', 'user', 'images'])
-    //         ->orderBy('title', 'desc') 
-    //         ->get();
-
-    //     return response()->json(['data' => $stories], 200);
-    // }
 
     public function getSimilarStories($storyId)
     {
