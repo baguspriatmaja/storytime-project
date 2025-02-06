@@ -91,15 +91,28 @@ class StoryController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(6);
 
-        return response()->json([
-            'story_id' => $stories->first()->id,
-            'title' => $stories->first()->title,
-            'content' => $stories->first()->content,
-            'cover' => $stories->first()->images[0],
-            'author_img' => $stories->first()->user->imageLink,
-            'created_at' => $stories->first()->created_at->toDateTimeString(),
-        ],
-            200 );
+            $formattedStories = $stories->map(function ($story) {
+                return [
+                    'story_id' => $story->id,
+                    'title' => $story->title,
+                    'username' => $story->user->username,
+                    'content' => $story->content,
+                    'cover' => $story->images[0],
+                    'author_img' => $story->user->imageLink,
+                    'created_at' => $story->created_at->toDateTimeString(),
+                    
+                ];
+            });
+    
+            return response()->json([
+                'data' => $formattedStories,
+                'pagination' => [
+                    'total' => $stories->total(),
+                    'per_page' => $stories->perPage(),
+                    'current_page' => $stories->currentPage(),
+                    'last_page' => $stories->lastPage(),
+                ],
+            ]);
     }
 
     public function getImagesByStoryId($id)
