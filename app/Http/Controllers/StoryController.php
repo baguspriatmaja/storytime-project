@@ -98,7 +98,7 @@ class StoryController extends Controller
                     'username' => $story->user->username,
                     'content' => $story->content,
                     'cover' => $story->images[0],
-                    'author_img' => $story->user->imageLink,
+                    'author_img' => $story->user->imageLink,    
                     'created_at' => $story->created_at->toDateTimeString(),
                     
                 ];

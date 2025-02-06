@@ -61,9 +61,50 @@ class BookmarkController extends Controller
             return response()->json(['message' => 'Belum ada Bookmark yang ditambahkan.'], 200);
         }
 
+        $formattedStories = $bookmarks->map(function ($bookmark) {
+            return [
+                'bookmark_id' => $bookmark->id,
+                'user_id' => $bookmark->user_id,
+                'category_id' => $bookmark->story->category_id,
+                'story_id' => $bookmark->story_id,
+                'title' => $bookmark->story->title,
+                'content' => $bookmark->story->content,
+                'created_at' => $bookmark->story->created_at->toDateTimeString(),
+                'category' => [
+                    'category_id' => $bookmark->story->category->id,
+                    'name' => $bookmark->story->category->name,
+                    'created_at' => $bookmark->story->category->created_at->toDateTimeString(),
+                    'updated_at' => $bookmark->story->category->updated_at->toDateTimeString(),
+                ],
+                'images' => $bookmark->story->images->map(function ($image) {
+                    return [
+                        'image_id' => $image->id,
+                        'story_id' => $image->story_id,
+                        'path' => $image->path,
+                        'created_at' => $image->created_at->toDateTimeString(),
+                        'updated_at' => $image->updated_at->toDateTimeString(),
+                    ];
+                }),
+            ];
+        });
+
         return response()->json([
-            'bookmark' => $bookmarks
-        ], 200); 
+            'data' => $formattedStories,
+            'pagination' => [
+                'first_page_url' => $bookmarks->url(1),
+                'from' => $bookmarks->firstItem(),
+                'last_page' => $bookmarks->lastPage(),
+                'last_page_url' => $bookmarks->url($bookmarks->lastPage()),
+                'links' => $bookmarks->links(),
+                'next_page_url' => $bookmarks->nextPageUrl(),
+                'path' => $bookmarks->path(),
+                'per_page' => $bookmarks->perPage(),
+                'prev_page_url' => $bookmarks->previousPageUrl(),
+                'to' => $bookmarks->lastItem(),
+                'total' => $bookmarks->total(),
+                'current_page' => $bookmarks->currentPage(),
+            ],
+        ]);
     }
 
     public function show(string $id)
