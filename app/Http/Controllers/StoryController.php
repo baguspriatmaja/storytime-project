@@ -13,7 +13,7 @@ class StoryController extends Controller
         $keyword = $request->input('keyword');
         $categoryId = $request->input('category_id');
         $orderType = $request->query('order', 'newest');
-        $perPage = $request->query('per_page', 12);
+        $perPage = $request->query('per_page');
 
         
         $storiesQuery = Story::with(['category', 'user', 'images', 'bookmarks']);
@@ -140,7 +140,7 @@ class StoryController extends Controller
 
         $stories = Story::with(['category', 'images'])
             ->where('user_id', $userId)
-            ->orderBy('created_at', 'asc')
+            ->orderBy('created_at', 'desc')
             ->paginate(12);
 
         if ($stories->isEmpty()) {
