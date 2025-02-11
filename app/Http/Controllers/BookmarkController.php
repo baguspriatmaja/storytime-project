@@ -54,7 +54,7 @@ class BookmarkController extends Controller
 
         $bookmarks = Bookmark::with(['story'])
             ->where('user_id', $userId)
-            ->orderBy('created_at', 'asc')
+            ->orderBy('created_at', 'desc')
             ->paginate(12);
 
         if ($bookmarks->isEmpty()) {
