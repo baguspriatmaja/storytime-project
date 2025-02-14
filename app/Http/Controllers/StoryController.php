@@ -100,7 +100,10 @@ class StoryController extends Controller
                     'cover' => $story->images[0],
                     'author_img' => $story->user->imageLink,    
                     'created_at' => $story->created_at->toDateTimeString(),
-                    
+                    'category' => [
+                        'category_id' => $story->category->id,
+                        'name' => $story->category->name,
+                    ],
                 ];
             });
     
