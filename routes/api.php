@@ -32,7 +32,6 @@ Route::middleware('auth:sanctum')->post('/logout', [UserController::class, 'logo
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/users/{userId}/update', [UserController::class, 'updateProfile']);
     Route::post('/users/{userId}/image', [UserController::class, 'updateProfileImage']);
-    Route::get('/users/get', [UserController::class, 'getUsers']);
     Route::get('/users/auth', [UserController::class, 'getAuthUser']);
 });
 
@@ -46,7 +45,7 @@ Route::get('/stories/{id}/images', [StoryController::class, 'getImagesByStoryId'
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-stories', [StoryController::class, 'getMyStories']);
     Route::post('/stories/add', [StoryController::class, 'store']);
-    Route::post('/stories/{storyId}/update', [StoryController::class, 'update']);
+    Route::post('/stories/{story}/update', [StoryController::class, 'update']);
     Route::delete('/stories/{storyId}/delete', [StoryController::class, 'destroy']);
 });
 

@@ -153,29 +153,6 @@ class StoryController extends Controller
         return response()->json($stories, 200);
     }
 
-    public function getSimilarStories($storyId)
-    {
-        
-        $currentStory = Story::with('category')->find($storyId);
-
-        if (!$currentStory) {
-            return response()->json(['message' => 'Story tidak ditemukan.'], 404);
-        }
-
-        $similarStories = Story::with(['category', 'user', 'images'])
-            ->where('category_id', $currentStory->category_id) 
-            ->where('id', '!=', $storyId) 
-            ->orderBy('created_at', 'desc') 
-            ->paginate(3); 
-
-        if ($similarStories->isEmpty()) {
-            return response()->json(['message' => 'Tidak ada story serupa yang ditemukan.'], 200);
-        }
-
-        return response()->json($similarStories, 200);
-    }
-
-
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -246,10 +223,8 @@ class StoryController extends Controller
     }
 
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, Story $story)
     {
-        $story = Story::findOrFail($id);
-
         $validatedData = $request->validate([
             'category_id' => ['nullable', 'integer'],
             'title' => ['nullable', 'string', 'max:255'],

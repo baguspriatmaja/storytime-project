@@ -102,7 +102,7 @@ class UserController extends Controller
     // Fungsi untuk logout
     public function logout(Request $request)
     {
-        // Menghapus semua token pengguna yang sedang login
+        
         $request->user()->tokens()->delete();
 
         return response()->json([
@@ -114,7 +114,7 @@ class UserController extends Controller
     {
     $validator = Validator::make($request->all(), [
         'name' => 'sometimes|string|max:255',
-        'about' => 'sometimes|string|max:500',
+        'about' => 'nullable|string|max:500',
         'old_password' => 'nullable|string|min:8',
         'new_password' => 'nullable|string|min:8|different:old_password',
         'confirm_new_password' => 'nullable|same:new_password',
@@ -206,22 +206,6 @@ class UserController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
-    }
-
-    public function getUsers()
-    {
-        $users = User::all();
-
-        // Tambahkan URL gambar ke setiap user
-        foreach ($users as $user) {
-            if ($user->imageLink) {
-                $user->image_url = url('profile_images/' . $user->imageLink);
-            } else {
-                $user->image_url = null;
-            }
-        }
-
-        return response()->json($users);
     }
 
     public function getAuthUser(Request $request)
